@@ -1,0 +1,17 @@
+{
+  "name": "aventura-de-colores-intercambio",
+  "version": "1.0.0",
+  "description": "Aventura de Colores · Intercambio de Regalos (amigo secreto, solo Perú, Ripley)",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
