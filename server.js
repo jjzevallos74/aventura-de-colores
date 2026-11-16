@@ -645,10 +645,14 @@ app.post('/api/org/editar', soloOrganizador, (req, res) => {
     if (telefono !== p.telefono && db.participantes.filter((x) => x.telefono === telefono).length >= 6)
       return res.status(400).json({ error: 'Ese número ya tiene 6 personas inscritas.' });
   }
+  // Nuevo PIN (opcional): el organizador lo cambia si alguien lo olvidó; cierra sus sesiones abiertas
+  const pin = String(req.body?.pin ?? '').trim();
+  if (pin && !/^\d{4}$/.test(pin)) return res.status(400).json({ error: 'El PIN debe tener 4 dígitos.' });
+  if (pin) { const h = hashSecreto(pin); p.pinSal = h.sal; p.pinHash = h.hash; p.sesiones = []; }
   p.nombre = nombre; p.pais = pais; p.telefono = telefono; p.intentosPin = 0;
   if (p.generoAuto) p.genero = generoPorNombre(nombre);
   guardar();
-  res.json({ ok: true, nombre, pais, telefono });
+  res.json({ ok: true, nombre, pais, telefono, pinCambiado: !!pin });
 });
 
 app.post('/api/org/genero', soloOrganizador, (req, res) => {
