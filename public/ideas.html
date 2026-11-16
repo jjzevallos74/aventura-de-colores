@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ideas de regalo · Aventura de Colores · Intercambio de Regalos</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#14532d">
+<link rel="icon" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Aventura de Colores">
+<link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+<div class="envoltura">
+  <header class="cabecera">
+    <img class="logo" src="/logo.png" alt="Aventura de Colores" width="487" height="144">
+    <div class="cinta">🎁 Ideas de regalo</div>
+    <h1 id="titulo">Intercambio de Regalos</h1>
+    <p class="sub">Ideas en Ripley dentro del monto del intercambio.</p>
+    <div class="chips" id="chips"></div>
+  </header>
+  <section class="tarjeta"><h2>👩 Para ella</h2><div id="ideas-m"></div></section>
+  <section class="tarjeta"><h2>👨 Para él</h2><div id="ideas-h"></div></section>
+  <p class="pie"><a class="enlace" href="/ver">Ver a quién le regalo</a> · <a class="enlace" href="/">Inscripción</a></p>
+</div>
+<script src="/ideas.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+fetch('/api/info').then(r => r.json()).then(i => {
+  document.getElementById('titulo').textContent = i.titulo;
+  const c = document.getElementById('chips');
+  const add = (t) => { const s = document.createElement('span'); s.className = 'chip'; s.textContent = t; c.appendChild(s); };
+  if (i.presupuesto) add('💵 ' + i.presupuesto);
+  if (i.fechaEntrega) add('📅 ' + i.fechaEntrega);
+  mostrarIdeas(document.getElementById('ideas-m'), { pais: 'PE', rango: i.rango, genero: 'm' });
+  mostrarIdeas(document.getElementById('ideas-h'), { pais: 'PE', rango: i.rango, genero: 'h' });
+});
+</script>
+<script src="/instalar.js"></script>
+</body>
+</html>

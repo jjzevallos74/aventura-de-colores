@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Inscripción · Aventura de Colores · Intercambio de Regalos</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#14532d">
+<link rel="icon" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Aventura de Colores">
+<link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+<div class="envoltura">
+  <header class="cabecera">
+    <img class="logo" src="/logo.png" alt="Aventura de Colores" width="487" height="144">
+    <div class="cinta">🎁 Amigo secreto</div>
+    <h1 id="titulo">Intercambio de Regalos</h1>
+    <p class="sub">Inscríbete con tu nombre y tu número de WhatsApp. Cuando se abra el sorteo te avisaremos por WhatsApp para que saques tu nombre.</p>
+    <div class="chips" id="chips"></div>
+  </header>
+
+  <div class="anuncio oculto" id="anuncio"><b id="anuncio-t"></b><span id="anuncio-d"></span></div>
+
+  <section class="tarjeta" id="formulario">
+    <h2>Inscripción</h2>
+    <form id="f-ins" autocomplete="on">
+      <label for="nombre">Tu nombre y apellido</label>
+      <input id="nombre" name="nombre" maxlength="40" required placeholder="Ej. María Torres" autocomplete="name">
+
+      <label>Eres</label>
+      <div class="genero" id="genero">
+        <button type="button" class="gen" data-g="h">👨 Masculino</button>
+        <button type="button" class="gen" data-g="m">👩 Femenino</button>
+      </div>
+      <div class="ayuda">Así las ideas de regalo para ti serán las adecuadas.</div>
+
+      <label for="telefono">Tu número de WhatsApp</label>
+      <div class="fila-tel">
+        <select id="pais" name="pais" aria-label="País">
+          <option value="PE">🇵🇪 +51</option>
+        </select>
+        <input id="telefono" name="telefono" inputmode="tel" required placeholder="987 654 321" autocomplete="tel-national">
+      </div>
+      <div class="ayuda" id="ayuda-tel">Celular de Perú: 9 dígitos que empieza con 9.</div>
+      <div class="ayuda">¿Alguien de tu familia no tiene WhatsApp? Puedes inscribirlo con tu mismo número: solo usa su nombre y créale su propio PIN.</div>
+
+      <label for="pin">Crea un PIN de 4 dígitos</label>
+      <input id="pin" name="pin" inputmode="numeric" pattern="\d{4}" maxlength="4" required placeholder="••••" autocomplete="off">
+      <div class="ayuda">Solo tú lo sabes. Te sirve para ver tu resultado y cambiar tu lista de regalos.</div>
+
+
+      <button type="submit" id="b-ins">Inscribirme</button>
+    </form>
+
+    <div id="msg" class="msg oculto"></div>
+  </section>
+
+  <section class="tarjeta centro oculto" id="listo">
+    <div class="regalo">🎁</div>
+    <h2 id="listo-t">¡Listo!</h2>
+    <p id="listo-d">Ya estás inscrito. Cuando se abra el sorteo te avisaremos por WhatsApp para que saques el nombre de la persona a quien le vas a regalar.</p>
+    <p><b>Siguiente paso:</b> arma tu lista de deseos para que sepan qué te gustaría recibir.</p>
+    <a class="boton sec" href="/ver#mi-lista">🎁 Armar mi lista de deseos</a>
+    <a class="boton wa" id="b-wa" target="_blank" rel="noopener">📲 Enviarme un recordatorio por WhatsApp</a>
+    <p class="ayuda">Se abre WhatsApp con un mensaje para ti mismo con el enlace de la app. Tu PIN no se incluye: guárdalo tú.</p>
+    <p class="ayuda">En “Mi intercambio” ves las listas de deseos de todos, el buscador de regalos y, cuando se abra el sorteo, ahí sacas tu nombre.</p>
+  </section>
+
+  <section class="tarjeta centro oculto" id="cerrado">
+    <div class="regalo">🔒</div>
+    <h2>Inscripción cerrada</h2>
+    <p id="cerrado-t">La inscripción ya no está abierta.</p>
+  </section>
+
+  <section class="tarjeta inst oculto" id="instalar"></section>
+  <section class="tarjeta" id="participantes"></section>
+
+  <p class="pie">¿Ya estás inscrito? <a class="enlace" href="/ver">Entrar a mi intercambio</a></p>
+</div>
+
+<script src="/fecha-sorteo.js"></script>
+<script src="/ideas.js"></script>
+<script src="/participantes.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+let datos = null, genero = null;
+document.querySelectorAll('#genero .gen').forEach((b) => b.addEventListener('click', () => {
+  genero = b.dataset.g;
+  document.querySelectorAll('#genero .gen').forEach((x) => x.classList.toggle('elegido', x === b));
+}));
+const lista = listaParticipantes($('participantes'));
+
+function msg(texto, tipo = 'error') { const m = $('msg'); m.textContent = texto; m.className = 'msg ' + tipo; }
+function sinMsg() { $('msg').className = 'msg oculto'; }
+
+async function api(url, body) {
+  const r = await fetch(url, { method: body ? 'POST' : 'GET', headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || 'Algo salió mal. Intenta de nuevo.');
+  return j;
+}
+
+async function cargarInfo() {
+  try {
+    const i = await api('/api/info');
+    $('titulo').textContent = i.titulo;
+    document.title = 'Inscripción · ' + i.titulo;
+    const chips = $('chips'); chips.textContent = '';
+    const add = (t) => { const s = document.createElement('span'); s.className = 'chip'; s.textContent = t; chips.appendChild(s); };
+    if (i.presupuesto) add('💵 ' + i.presupuesto);
+    if (i.fechaEntrega) add('📅 ' + i.fechaEntrega);
+    add('👥 ' + i.totalInscritos + ' inscritos');
+    const fs = textoFechaSorteo(i.fechaSorteo);
+    if (fs) { $('anuncio-t').textContent = fs.titulo; $('anuncio-d').textContent = fs.detalle; $('anuncio').classList.remove('oculto'); }
+    if (i.sorteoRealizado) {
+      $('listo-d').textContent = 'Ya estás inscrito y el sorteo ya está abierto: entra a “Mi intercambio” y toca “🎲 Sacar mi nombre” para ver a quién le regalas.';
+      document.querySelector('.sub').textContent = 'Inscríbete con tu nombre y tu número de WhatsApp. El sorteo ya está abierto: apenas te inscribas, sacas tu nombre.';
+    }
+    if (!i.inscripcionAbierta) {
+      $('formulario').classList.add('oculto'); $('cerrado').classList.remove('oculto');
+      $('cerrado-t').textContent = i.sorteoRealizado ? 'El sorteo ya se realizó.' : 'El organizador cerró la inscripción por ahora.';
+    }
+  } catch (e) { msg('No se pudo cargar la información.'); }
+}
+
+
+$('f-ins').addEventListener('submit', async (e) => {
+  e.preventDefault(); sinMsg();
+  datos = { nombre: $('nombre').value, genero, pais: $('pais').value, telefono: $('telefono').value, pin: $('pin').value };
+  if (!genero) { msg('Elige Masculino o Femenino.'); return; }
+  $('b-ins').disabled = true;
+  try {
+    const r = await api('/api/inscripcion', datos);
+    try { if (r.token) localStorage.setItem('amigo-secreto-sesion', r.token); } catch {}
+    listo(r.nombre);
+  } catch (err) { msg(err.message); }
+  $('b-ins').disabled = false;
+});
+
+
+function listo(nombre) {
+  $('formulario').classList.add('oculto'); $('listo').classList.remove('oculto');
+  $('listo-t').textContent = '¡Listo, ' + nombre + '!';
+  // WhatsApp a su propio número (gratis, sin Twilio)
+  let d = datos.telefono.replace(/\D/g, '');
+  d = (d.length === 11 && d.startsWith('51') ? '' : '51') + d;
+  const texto = `🎁 Me inscribí en "${$('titulo').textContent}".\nCuando se haga el sorteo, aquí veo a quién le regalo y su lista (con mi número y mi PIN):\n${location.origin}/ver`;
+  $('b-wa').href = `https://wa.me/${d}?text=${encodeURIComponent(texto)}`;
+  lista.recargar();
+  cargarInfo();
+}
+cargarInfo();
+</script>
+<script src="/instalar.js"></script>
+</body>
+</html>

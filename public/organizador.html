@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Organizador · Aventura de Colores · Intercambio de Regalos</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#14532d">
+<link rel="icon" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Aventura de Colores">
+<link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+<div class="envoltura ancho">
+  <header class="cabecera">
+    <img class="logo" src="/logo.png" alt="Aventura de Colores" width="487" height="144">
+    <div class="cinta">🎨 Panel del organizador</div>
+    <h1 id="titulo">Intercambio de Regalos</h1>
+    <p class="sub">Controlas todo el intercambio, pero nunca verás quién le regala a quién.</p>
+  </header>
+
+  <!-- Acceso -->
+  <section class="tarjeta" id="login" style="max-width:420px;margin:0 auto">
+    <form id="f-login">
+      <label for="clave">Clave del organizador</label>
+      <input id="clave" type="password" required autocomplete="current-password">
+      <button type="submit" class="sec">Entrar</button>
+    </form>
+    <div id="msg-login" class="msg oculto"></div>
+  </section>
+
+  <div id="panel" class="oculto">
+    <div id="aviso-modo" class="msg info oculto" style="margin:0 0 16px"></div>
+
+    <div class="grid2">
+      <!-- Estado y sorteo -->
+      <section class="tarjeta">
+        <h2>Participantes</h2>
+        <div class="contador">
+          <div id="c-total"><b id="n-total">0</b>inscritos</div>
+          <div id="c-par"><b id="n-par">—</b><span id="t-par">cantidad</span></div>
+        </div>
+        <div id="msg-par" class="msg oculto"></div>
+
+        <div id="zona-sortear">
+          <button id="b-sortear">🎲 Abrir el sorteo</button>
+          <p class="ayuda">Al abrirlo se cierra la inscripción y la app arma el sorteo en secreto. Después cada participante entra y toca “🎲 Sacar mi nombre” cuando quiera. Avísales por WhatsApp desde la lista.</p>
+        </div>
+        <div id="zona-hecho" class="oculto">
+          <div class="msg ok" id="t-hecho"></div>
+        </div>
+        <div id="msg-sorteo" class="msg oculto"></div>
+      </section>
+
+      <!-- Ajustes -->
+      <section class="tarjeta">
+        <h2>Ajustes</h2>
+        <form id="f-ajustes">
+          <label for="a-titulo">Nombre del intercambio</label>
+          <input id="a-titulo" maxlength="60">
+          <label>Precio del regalo (soles)</label>
+          <div class="fila2">
+            <div><input id="a-min" inputmode="decimal" placeholder="Mín. ej. 50" aria-label="Mínimo en soles"></div>
+            <div><input id="a-max" inputmode="decimal" placeholder="Máx. ej. 50" aria-label="Máximo en soles"></div>
+          </div>
+          <div class="ayuda" id="t-soles"></div>
+          <label for="a-fsorteo">Fecha y hora del sorteo automático</label>
+          <input id="a-fsorteo" type="datetime-local">
+          <div class="ayuda" id="t-fsorteo">Ese día el sorteo se abre solo y cada uno saca su nombre. Déjalo vacío si prefieres abrirlo tú.</div>
+          <label for="a-fecha">Fecha de entrega</label>
+          <input id="a-fecha" maxlength="40" placeholder="Ej. 24 de diciembre">
+          <p class="ayuda"><b>Inscripción:</b> siempre abierta. Quien se inscriba después del sorteo entra al círculo y saca su nombre.</p>
+          <button type="submit" class="sec">Guardar ajustes</button>
+        </form>
+        <div id="msg-ajustes" class="msg oculto"></div>
+      </section>
+    </div>
+
+    <section class="tarjeta">
+      <h2>Invita a los participantes</h2>
+      <p class="ayuda" style="margin-top:0">Comparte este enlace por WhatsApp o texto. Cada persona se inscribe con su nombre y su número.</p>
+      <div class="copiar"><input id="url-ins" readonly><button class="peq sec" id="b-copiar">Copiar</button></div>
+      <a class="boton wa" id="b-wa-inv" target="_blank" rel="noopener">📲 Invitar por WhatsApp</a>
+      <div class="fila2">
+        <a class="boton fant" href="/invitacion.pdf" download="invitacion-aventura-de-colores.pdf">📄 Invitación PDF (con enlace)</a>
+        <a class="boton fant" href="/invitacion.png" download="invitacion-aventura-de-colores.png">🖼️ Imagen con QR</a>
+      </div>
+      <img class="qr-org" src="/qr.png" alt="Código QR de la inscripción">
+      <p class="ayuda centro">Al entrar, cada persona puede instalar la app en su celular con un toque.</p>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Lista</h2>
+      <ul class="lista" id="lista"></ul>
+      <p class="ayuda centro oculto" id="vacia">Todavía no hay nadie inscrito.</p>
+    </section>
+
+    <section class="tarjeta">
+      <h2>🚫 Exclusiones</h2>
+      <p class="ayuda" style="margin-top:0">Personas que no se pueden sacar entre sí (por ejemplo, esposos o los que viven juntos). Se aplica en las dos direcciones.</p>
+      <div id="ex-form" class="fila2">
+        <select id="ex-a" aria-label="Primera persona"></select>
+        <select id="ex-b" aria-label="Segunda persona"></select>
+      </div>
+      <button class="sec" id="b-ex">Agregar exclusión</button>
+      <div id="msg-ex" class="msg oculto"></div>
+      <ul class="lista" id="lista-ex"></ul>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Reiniciar</h2>
+      <p class="ayuda" style="margin-top:0">“Repetir sorteo” borra el resultado y reabre la inscripción (conserva a los inscritos). “Borrar todo” elimina también a los participantes.</p>
+      <div class="grid2">
+        <button class="fant" id="b-reini-sorteo">Repetir sorteo</button>
+        <button class="fant" id="b-reini-todo">Borrar todo</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let clave = sessionStorage.getItem('clave-org') || '';
+let estado = null;
+
+function aviso(id, texto, tipo = 'error') { const m = $(id); m.textContent = texto; m.className = 'msg ' + tipo; }
+function quitar(id) { $(id).className = 'msg oculto'; }
+
+async function api(url, body) {
+  const r = await fetch(url, { method: body ? 'POST' : 'GET', headers: { 'Content-Type': 'application/json', 'x-clave-organizador': clave }, body: body ? JSON.stringify(body) : undefined });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401) { salir(); throw new Error(j.error); }
+  if (!r.ok) throw new Error(j.error || 'Algo salió mal.');
+  return j;
+}
+function salir() { sessionStorage.removeItem('clave-org'); clave = ''; $('panel').classList.add('oculto'); $('login').classList.remove('oculto'); }
+
+$('f-login').addEventListener('submit', async (e) => {
+  e.preventDefault(); clave = $('clave').value;
+  try { await refrescar(); sessionStorage.setItem('clave-org', clave); }
+  catch (err) { aviso('msg-login', err.message || 'Clave incorrecta.'); }
+});
+
+const BANDERA = { US: '🇺🇸', PE: '🇵🇪' };
+function formatoTel(t) {
+  if (t.startsWith('+1')) return `+1 (${t.slice(2,5)}) ${t.slice(5,8)}-${t.slice(8)}`;
+  if (t.startsWith('+51')) return `+51 ${t.slice(3,6)} ${t.slice(6,9)} ${t.slice(9)}`;
+  return t;
+}
+
+async function refrescar() {
+  estado = await api('/api/org/estado');
+  $('login').classList.add('oculto'); $('panel').classList.remove('oculto');
+  const a = estado.ajustes;
+  $('titulo').textContent = a.titulo;
+  if (document.activeElement?.closest('#f-ajustes') == null) {
+    $('a-titulo').value = a.titulo; $('a-min').value = a.minPEN ?? ''; $('a-max').value = a.maxPEN ?? '';
+    if (a.fechaSorteo) { const d = new Date(a.fechaSorteo); const z = (n) => String(n).padStart(2, '0'); $('a-fsorteo').value = `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`; } else $('a-fsorteo').value = ''; $('a-fecha').value = a.fechaEntrega;
+  }
+  $('a-fsorteo').disabled = estado.sorteo.realizado;
+  if (!estado.sorteo.realizado && a.autoError) aviso('msg-sorteo', '⚠️ El sorteo automático no se pudo abrir: ' + a.autoError, 'error');
+  else if (!estado.sorteo.realizado && a.fechaSorteo) aviso('msg-sorteo', '🗓️ El sorteo se abrirá solo el ' + new Date(a.fechaSorteo).toLocaleString('es-PE', { day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' }) + ' (hora de tu computadora). También puedes abrirlo antes con el botón.', 'info');
+  const r = estado.rango;
+  $('t-soles').textContent = r.minPEN && r.minPEN === r.maxPEN ? `Monto fijo: S/ ${r.minPEN}. Las ideas abren Ripley alrededor de ese precio. Para un rango, pon dos montos distintos.` : r.minPEN && r.maxPEN ? `Rango: S/ ${r.minPEN} – S/ ${r.maxPEN}. Las ideas abren Ripley en ese rango.` : 'Pon el monto para filtrar Ripley.';
+  $('url-ins').value = location.origin + '/';
+  const inv = `🎨 ¡Te invito al ${a.titulo} de Aventura de Colores! 🎁\n` + (estado.rango.minPEN ? `Regalo de ${estado.rango.minPEN === estado.rango.maxPEN ? 'S/ ' + estado.rango.minPEN : 'S/ ' + estado.rango.minPEN + ' – S/ ' + estado.rango.maxPEN}.\n` : '') + (a.fechaEntrega ? `Entrega: ${a.fechaEntrega}.\n` : '') + `Inscríbete aquí y arma tu lista de regalos:\n${location.origin}/`;
+  $('b-wa-inv').href = 'https://wa.me/?text=' + encodeURIComponent(inv);
+
+
+  // Contador y paridad (Regla 2)
+  const n = estado.total;
+  $('n-total').textContent = n;
+  $('n-par').textContent = n === 0 ? '—' : (estado.esPar ? 'Par ✓' : 'Impar');
+  $('t-par').textContent = '';
+  $('c-par').className = n && !estado.esPar ? 'impar' : '';
+  if (!estado.sorteo.realizado && n > 0 && !estado.esPar) aviso('msg-par', `Hay ${n} inscritos. Para sortear la cantidad debe ser par: falta 1 persona o quita a 1.`, 'info');
+  else if (!estado.sorteo.realizado && n === 1) aviso('msg-par', 'Se necesitan al menos 2 participantes.', 'info');
+  else quitar('msg-par');
+
+  // Sorteo
+  $('zona-sortear').classList.toggle('oculto', estado.sorteo.realizado);
+  $('zona-hecho').classList.toggle('oculto', !estado.sorteo.realizado);
+  $('b-sortear').disabled = !estado.puedeSortear;
+  if (estado.sorteo.realizado) {
+    const f = new Date(estado.sorteo.fecha).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' });
+    $('t-hecho').textContent = `Sorteo abierto (${f}). Los resultados son secretos: ni siquiera tú puedes verlos.`;
+    const avisados = estado.participantes.filter((p) => p.avisado).length;
+    aviso('aviso-modo', `Avisos por WhatsApp enviados: ${avisados} de ${n}. Toca “WhatsApp” junto a cada nombre.`, avisados === n ? 'ok' : 'info');
+  }
+
+  // Lista (sin resultados)
+  const ul = $('lista'); ul.textContent = '';
+  $('vacia').classList.toggle('oculto', n > 0);
+  for (const p of estado.participantes) {
+    const li = document.createElement('li');
+    const q = document.createElement('div'); q.className = 'quien' + (p.conoce ? ' gris-org' : '');
+    const b = document.createElement('b'); b.textContent = p.nombre + (p.genero === 'm' ? '  👩' : '  👨');
+    const lapiz = document.createElement('button'); lapiz.type = 'button'; lapiz.className = 'lapiz'; lapiz.textContent = '✏️'; lapiz.title = 'Editar nombre o número';
+    lapiz.onclick = () => editarNombre(q, p);
+    b.appendChild(lapiz);
+    const s = document.createElement('small'); s.textContent = `${BANDERA[p.pais] || ''} ${formatoTel(p.telefono)} · 🎁 ${p.deseos || 0} en su lista` + (estado.sorteo.realizado ? (p.conoce ? ' · ✓ ya sacó su nombre' : ' · aún no saca su nombre') : '');
+    q.append(b, s); li.appendChild(q);
+    const acc = document.createElement('div'); acc.style.display = 'flex'; acc.style.gap = '8px'; acc.style.alignItems = 'center';
+    if (estado.sorteo.realizado) {
+      const texto = `🎁 Hola ${p.nombre}! Ya está abierto el sorteo de "${estado.ajustes.titulo}" 🎲\nEntra con tu número y tu PIN y saca el nombre de la persona a quien le vas a regalar:\n${estado.urlVer}`;
+      const aEl = document.createElement('a'); aEl.className = 'boton peq ' + (p.avisado ? 'fant' : 'wa'); aEl.textContent = p.avisado ? '✓ Avisado' : '📲 WhatsApp';
+      aEl.href = `https://wa.me/${p.telefono.replace(/\D/g, '')}?text=${encodeURIComponent(texto)}`;
+      aEl.target = '_blank'; aEl.rel = 'noopener';
+      aEl.addEventListener('click', () => { api('/api/org/avisado', { id: p.id }).then(refrescar).catch(() => {}); });
+      acc.appendChild(aEl);
+    } else {
+      const g = document.createElement('button'); g.className = 'peq fant'; g.title = 'Cambiar género';
+      g.textContent = p.genero === 'm' ? '→ 👨' : '→ 👩';
+      g.onclick = async () => { await api('/api/org/genero', { id: p.id, genero: p.genero === 'm' ? 'h' : 'm' }).catch((err) => alertaSorteo(err.message)); refrescar(); };
+      acc.appendChild(g);
+      const x = document.createElement('button'); x.className = 'peq fant'; x.textContent = 'Quitar';
+      x.onclick = async () => { if (!confirm(`¿Quitar a ${p.nombre}?`)) return; await api('/api/org/eliminar', { id: p.id }).catch(err => alertaSorteo(err.message)); refrescar(); };
+      acc.appendChild(x);
+    }
+    li.appendChild(acc); ul.appendChild(li);
+  }
+  pintarExclusiones();
+}
+// Edición en línea del nombre
+let editando = false;
+function editarNombre(q, p) {
+  editando = true;
+  q.textContent = '';
+  const f = document.createElement('form'); f.className = 'editar-nombre';
+  const inp = document.createElement('input'); inp.value = p.nombre; inp.maxLength = 40; inp.placeholder = 'Nombre y apellido';
+  const fila = document.createElement('div'); fila.className = 'fila-tel ed-tel';
+  const sel = document.createElement('select');
+  for (const [v, t] of [['PE', '🇵🇪 +51']]) { const o = document.createElement('option'); o.value = v; o.textContent = t; sel.appendChild(o); }
+  sel.value = p.pais;
+  const tel = document.createElement('input'); tel.inputMode = 'tel'; tel.placeholder = 'Número de WhatsApp';
+  tel.value = p.telefono.replace(/^\+(1|51)/, '');
+  fila.append(sel, tel);
+  const ok = document.createElement('button'); ok.type = 'submit'; ok.className = 'peq sec'; ok.textContent = 'Guardar';
+  const no = document.createElement('button'); no.type = 'button'; no.className = 'peq fant'; no.textContent = 'Cancelar';
+  const err = document.createElement('small'); err.className = 'err-nombre';
+  f.append(inp, fila, ok, no, err);
+  q.appendChild(f);
+  inp.focus(); inp.select();
+  no.onclick = () => { editando = false; refrescar(); };
+  f.onsubmit = async (e) => {
+    e.preventDefault();
+    try { await api('/api/org/editar', { id: p.id, nombre: inp.value, pais: sel.value, telefono: tel.value }); editando = false; refrescar(); }
+    catch (ex) { err.textContent = ex.message; }
+  };
+}
+
+function pintarExclusiones() {
+  const ps = estado.participantes;
+  const nombre = (id) => (ps.find((p) => p.id === id) || {}).nombre || '¿?';
+  const hecho = estado.sorteo.realizado;
+  for (const sel of [$('ex-a'), $('ex-b')]) {
+    if (document.activeElement === sel) continue;
+    const v = sel.value; sel.textContent = '';
+    const o0 = document.createElement('option'); o0.value = ''; o0.textContent = 'Elige…'; sel.appendChild(o0);
+    for (const p of ps) { const o = document.createElement('option'); o.value = p.id; o.textContent = p.nombre; sel.appendChild(o); }
+    sel.value = ps.some((p) => p.id === v) ? v : '';
+    sel.disabled = hecho;
+  }
+  $('b-ex').disabled = hecho;
+  const ul = $('lista-ex'); ul.textContent = '';
+  if (!estado.exclusiones.length) { const li = document.createElement('li'); li.innerHTML = '<span class="ayuda">Sin exclusiones.</span>'; ul.appendChild(li); }
+  for (const [a, b] of estado.exclusiones) {
+    const li = document.createElement('li');
+    const t = document.createElement('div'); t.className = 'quien';
+    const bb = document.createElement('b'); bb.textContent = `${nombre(a)}  ↔  ${nombre(b)}`; t.appendChild(bb);
+    li.appendChild(t);
+    if (!hecho) {
+      const x = document.createElement('button'); x.className = 'peq fant'; x.textContent = 'Quitar';
+      x.onclick = async () => { try { await api('/api/org/exclusiones', { a, b, quitar: true }); } catch (err) { aviso('msg-ex', err.message); } refrescar(); };
+      li.appendChild(x);
+    }
+    ul.appendChild(li);
+  }
+}
+$('b-ex').addEventListener('click', async () => {
+  quitar('msg-ex');
+  const a = $('ex-a').value, b = $('ex-b').value;
+  if (!a || !b || a === b) return aviso('msg-ex', 'Elige dos personas distintas.');
+  try { await api('/api/org/exclusiones', { a, b }); aviso('msg-ex', 'Exclusión agregada.', 'ok'); $('ex-a').value = ''; $('ex-b').value = ''; }
+  catch (err) { aviso('msg-ex', err.message); }
+  refrescar();
+});
+
+function alertaSorteo(t, tipo = 'error') { aviso('msg-sorteo', t, tipo); }
+
+$('b-sortear').addEventListener('click', async () => {
+  if (!confirm(`¿Abrir el sorteo con ${estado.total} participantes? Se cerrará la inscripción y cada uno podrá sacar su nombre.`)) return;
+  $('b-sortear').disabled = true; $('b-sortear').textContent = 'Sorteando…';
+  try {
+    await api('/api/org/sortear', {});
+    alertaSorteo('¡Sorteo abierto! Mándale a cada uno su aviso por WhatsApp desde la lista para que saque su nombre.', 'ok');
+  } catch (err) { alertaSorteo(err.message); }
+  refrescar();
+});
+
+
+
+$('f-ajustes').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try {
+    await api('/api/org/ajustes', { titulo: $('a-titulo').value, minPEN: $('a-min').value, maxPEN: $('a-max').value, fechaSorteo: $('a-fsorteo').value ? new Date($('a-fsorteo').value).toISOString() : '', fechaEntrega: $('a-fecha').value });
+    aviso('msg-ajustes', 'Guardado.', 'ok'); setTimeout(() => quitar('msg-ajustes'), 2000);
+  } catch (err) { aviso('msg-ajustes', err.message); }
+  document.activeElement.blur(); refrescar();
+});
+
+$('b-copiar').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText($('url-ins').value); $('b-copiar').textContent = '¡Copiado!'; }
+  catch { $('url-ins').select(); }
+  setTimeout(() => $('b-copiar').textContent = 'Copiar', 1500);
+});
+
+async function reiniciar(modo, pregunta) {
+  const c = prompt(pregunta + '\n\nEscribe REINICIAR para confirmar:');
+  if (c === null) return;
+  try { await api('/api/org/reiniciar', { modo, confirmar: c.trim().toUpperCase() }); alertaSorteo('Listo.', 'ok'); }
+  catch (err) { alertaSorteo(err.message); }
+  refrescar();
+}
+$('b-reini-sorteo').addEventListener('click', () => reiniciar('sorteo', 'Se borrará el resultado del sorteo y se reabrirá la inscripción. Los avisos de WhatsApp ya enviados no se pueden retirar.'));
+$('b-reini-todo').addEventListener('click', () => reiniciar('todo', 'Se borrarán TODOS los participantes y el sorteo.'));
+
+if (clave) refrescar().catch(() => salir());
+setInterval(() => { if (clave && !document.hidden && !editando) refrescar().catch(() => {}); }, 15000);
+</script>
+<script src="/instalar.js"></script>
+</body>
+</html>

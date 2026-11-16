@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mi intercambio · Aventura de Colores · Intercambio de Regalos</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#14532d">
+<link rel="icon" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Aventura de Colores">
+<link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+<div class="envoltura">
+  <header class="cabecera">
+    <img class="logo" src="/logo.png" alt="Aventura de Colores" width="487" height="144">
+    <div class="cinta">🎁 Amigo secreto</div>
+    <h1 id="titulo">Intercambio de Regalos</h1>
+    <p class="sub" id="sub">Entra con tu número de WhatsApp y tu PIN.</p>
+  </header>
+
+  <!-- Entrar -->
+  <section class="tarjeta" id="formulario">
+    <form id="f-ver">
+      <label for="telefono">Tu número de WhatsApp</label>
+      <div class="fila-tel">
+        <select id="pais" aria-label="País">
+          <option value="PE">🇵🇪 +51</option>
+        </select>
+        <input id="telefono" inputmode="tel" required placeholder="987 654 321" autocomplete="tel-national">
+      </div>
+      <label for="pin">Tu PIN de 4 dígitos</label>
+      <input id="pin" inputmode="numeric" maxlength="4" required placeholder="••••" autocomplete="off">
+      <label class="recordar"><input type="checkbox" id="recordar" checked> Recordarme en este celular</label>
+      <button type="submit" id="b-ver">Entrar</button>
+    </form>
+    <div id="quien" class="oculto"></div>
+    <div id="msg" class="msg oculto"></div>
+    <p class="ayuda centro">¿Todavía no te inscribes? <a class="enlace" href="/">Inscríbete aquí</a></p>
+  </section>
+
+  <div id="app" class="oculto">
+    <div class="anuncio oculto" id="anuncio"><b id="anuncio-t"></b><span id="anuncio-d"></span></div>
+
+    <!-- 1. El intercambio -->
+    <section class="tarjeta">
+      <div class="evento">
+        <div id="ev-fecha" class="oculto"></div>
+        <div id="ev-pres"></div>
+      </div>
+    </section>
+
+    <!-- 2. Resultado -->
+    <section class="tarjeta centro oculto" id="resultado">
+      <div class="regalo">🎁</div>
+      <p id="hola"></p>
+      <div class="revelado" id="nombre-rec"></div>
+      <p class="ayuda">Es secreto. No se lo cuentes a nadie.</p>
+      <button class="btn-linea lleno" id="b-lista-rec" type="button"><span id="t-lista-rec">Ver su lista de deseos</span><span>›</span></button>
+      <button class="btn-linea borde" id="b-busca-rec" type="button"><span id="t-busca-rec">Buscador de regalos</span><span>›</span></button>
+    </section>
+
+    <section class="tarjeta centro oculto sacar" id="por-sacar">
+      <div class="regalo">🎲</div>
+      <h2>¡El sorteo está abierto!</h2>
+      <p>Cuando quieras, saca el nombre de la persona a quien le vas a regalar. Tú decides el momento.</p>
+      <div class="ruleta" id="ruleta">?</div>
+      <button id="b-sacar" type="button">🎲 Sacar mi nombre</button>
+      <p class="ayuda">Nunca te saldrá tu propio nombre ni alguien que ya le tocó a otro.</p>
+    </section>
+
+    <section class="tarjeta centro oculto" id="espera">
+      <div class="regalo">⏳</div>
+      <h2 id="espera-t"></h2>
+      <p id="espera-d">Ese día se abre solo: entras aquí y tocas “🎲 Sacar mi nombre”. Mientras tanto, arma tu lista de deseos.</p>
+    </section>
+
+    <!-- 3. Chat -->
+    <section class="tarjeta oculto" id="chat">
+      <h2>💬 Chat secreto</h2>
+      <div class="pestanas">
+        <button type="button" class="pestana activa" id="t-elegido"><span id="t-elegido-txt">Con mi elegido</span> <span class="badge oculto" id="n-elegido"></span></button>
+        <button type="button" class="pestana" id="t-amigo">Con mi amigo secreto <span class="badge oculto" id="n-amigo"></span></button>
+      </div>
+      <p class="ayuda izq" id="chat-ayuda"></p>
+      <div class="burbujas" id="burbujas"></div>
+      <form id="f-chat" class="fila-chat">
+        <input id="chat-txt" maxlength="300" placeholder="Escribe un mensaje…" autocomplete="off">
+        <button type="submit" class="sec" id="b-chat">Enviar</button>
+      </form>
+      <div id="msg-chat" class="msg oculto"></div>
+    </section>
+
+    <!-- 4. Listas de deseos de todos -->
+    <section class="tarjeta">
+      <h2 id="listas-t">Listas de deseos</h2>
+      <p class="ayuda izq" id="listas-ley"></p>
+      <ul class="listas" id="listas"></ul>
+      <a class="boton wa" id="b-compartir" target="_blank" rel="noopener">📲 Compartir invitación</a>
+    </section>
+
+    <!-- 5. Mi lista -->
+    <section class="tarjeta" id="mi-lista">
+      <h2>🎁 Mi lista de deseos</h2>
+      <div class="mi-genero"><span id="t-genero"></span>
+        <div class="genero peq-gen"><button type="button" class="gen" data-g="h">👨 Masculino</button><button type="button" class="gen" data-g="m">👩 Femenino</button></div>
+      </div>
+      <p class="ayuda izq oculto" id="genero-auto">Lo pusimos según tu nombre. Si no es correcto, cámbialo aquí.</p>
+      <div id="pedidos" class="aviso-pedido oculto"></div>
+      <p class="ayuda izq" id="nudge"></p>
+      <div id="mis-deseos"></div>
+      <button class="sec" id="b-guardar">Guardar mi lista</button>
+      <div id="msg-lista" class="msg oculto"></div>
+    </section>
+
+    <section class="tarjeta inst oculto" id="instalar"></section>
+    <p class="pie"><button class="fant peq" id="b-salir">Cerrar sesión / cambiar de persona</button></p>
+  </div>
+</div>
+<script src="/fecha-sorteo.js"></script>
+<script src="/ideas.js"></script>
+<script src="/regalos.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const CLAVE = 'amigo-secreto-sesion';
+const guardarToken = (t) => { try { t ? localStorage.setItem(CLAVE, t) : localStorage.removeItem(CLAVE); } catch {} };
+const leerToken = () => { try { return localStorage.getItem(CLAVE); } catch { return null; } };
+let cred = null, yo = null, cuadros = null, chat = null, hilo = 'elegido', timer = null, listas = [];
+
+async function post(url, body) {
+  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 300 && j.elegir) return j;
+  if (!r.ok) { const e = new Error(j.error || 'No se pudo completar.'); e.sesion = j.sesion; throw e; }
+  return j;
+}
+const opc = () => ({ pais: yo.pais, rango: yo.rango });
+const textoRango = (r) => !r || !r.minPEN ? '' : r.minPEN === r.maxPEN ? `S/ ${r.minPEN}` : `S/ ${r.minPEN} – S/ ${r.maxPEN}`;
+
+// ---------- Entrar ----------
+async function entrar(body) {
+  const j = await post('/api/mi-resultado', body);
+  if (j.elegir) return elegirPersona(body, j.elegir);
+  if (j.token) { cred = { token: j.token }; if ($('recordar').checked) guardarToken(j.token); }
+  yo = j;
+  mostrar();
+}
+// Varias personas con el mismo número y el mismo PIN: elegir quién entra
+function elegirPersona(body, lista) {
+  const caja = $('quien');
+  caja.textContent = '';
+  const t = document.createElement('p'); t.className = 'hoja-pregunta'; t.textContent = '¿Quién eres?';
+  caja.appendChild(t);
+  for (const x of lista) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'opcion'; b.textContent = x.nombre;
+    b.onclick = async () => { try { await entrar({ ...body, id: x.id }); } catch (err) { $('msg').textContent = err.message; $('msg').className = 'msg error'; } };
+    caja.appendChild(b);
+  }
+  caja.classList.remove('oculto');
+  $('f-ver').classList.add('oculto');
+}
+
+$('f-ver').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const m = $('msg'); m.className = 'msg oculto';
+  $('b-ver').disabled = true;
+  try { await entrar({ pais: $('pais').value, telefono: $('telefono').value, pin: $('pin').value }); }
+  catch (err) { m.textContent = err.message; m.className = 'msg error'; cred = null; }
+  $('b-ver').disabled = false;
+});
+(async () => {
+  const t = leerToken();
+  if (!t) return;
+  try { cred = { token: t }; await entrar({ token: t }); } catch { guardarToken(null); cred = null; }
+})();
+
+function mostrar() {
+  $('formulario').classList.add('oculto');
+  $('app').classList.remove('oculto');
+  $('sub').textContent = `Hola, ${yo.nombre} 👋`;
+  fetch('/api/info').then((r) => r.json()).then((i) => {
+    $('titulo').textContent = i.titulo;
+    $('b-compartir').href = 'https://wa.me/?text=' + encodeURIComponent(`🎨 ¡Te invito al ${i.titulo} de Aventura de Colores! 🎁\nInscríbete aquí y arma tu lista de deseos:\n${location.origin}/`);
+  }).catch(() => {});
+  if (yo.fechaEntrega) { $('ev-fecha').textContent = '📅 ' + yo.fechaEntrega; $('ev-fecha').classList.remove('oculto'); }
+  $('ev-pres').textContent = '🎁 ' + (textoRango(yo.rango, yo.pais) || 'Sin presupuesto');
+
+  const fs = textoFechaSorteo(yo.pendiente ? yo.fechaSorteo : null);
+  $('anuncio').classList.toggle('oculto', !fs);
+  if (fs) { $('anuncio-t').textContent = fs.titulo; $('anuncio-d').textContent = fs.detalle; }
+  $('espera').classList.add('oculto');
+  if (yo.pendiente) {
+    $('espera').classList.remove('oculto'); $('espera-t').textContent = 'Hola, ' + yo.nombre;
+    $('espera-d').textContent = yo.enEspera
+      ? 'Ya estás inscrito. Tu nombre para el sorteo se activa apenas se inscriba una persona más: entra aquí más tarde y toca “🎲 Sacar mi nombre”. Mientras tanto, arma tu lista de deseos.'
+      : 'Ese día se abre solo: entras aquí y tocas “🎲 Sacar mi nombre”. Mientras tanto, arma tu lista de deseos.';
+  }
+  else if (yo.porSacar) { $('por-sacar').classList.remove('oculto'); }
+  else pintarResultado();
+  clearInterval(timer);
+  timer = setInterval(async () => {
+    if (document.hidden) return;
+    if (yo.pendiente) { // ¿ya se abrió el sorteo?
+      try { const j = await post('/api/mi-resultado', cred); if (!j.pendiente) { yo = j; mostrar(); return; } } catch {}
+    }
+    if (!yo.pendiente && !yo.porSacar) cargarChat();
+    cargarListas();
+  }, 12000);
+  cuadros = cuadrosDeseos($('mis-deseos'), yo.misDeseos, { pais: yo.pais, rango: yo.rango, genero: yo.genero, alCambiar: () => guardarLista() });
+  if (compartido) { const c = compartido; compartido = null; if (cuadros.recibir(c.texto, c.titulo)) history.replaceState(null, '', '/ver#mi-lista'); }
+  pintarGenero();
+  pintarMiLista();
+  cargarListas();
+  if (location.hash === '#mi-lista') setTimeout(() => $('mi-lista').scrollIntoView({ behavior: 'smooth' }), 300);
+}
+
+function pintarResultado() {
+  {
+    $('por-sacar').classList.add('oculto');
+    $('hola').textContent = 'Te tocó regalarle a:';
+    $('nombre-rec').textContent = yo.regalasA;
+    $('t-lista-rec').textContent = `Ver la lista de deseos de ${yo.regalasA}`;
+    $('t-busca-rec').textContent = `Buscador de regalos para ${yo.regalasA}`;
+    $('resultado').classList.remove('oculto');
+    $('t-elegido-txt').textContent = 'Con ' + yo.regalasA;
+    $('chat').classList.remove('oculto');
+    cargarChat();
+  }
+}
+
+// ---------- Sacar mi nombre ----------
+$('b-sacar').addEventListener('click', async () => {
+  const b = $('b-sacar'); b.disabled = true;
+  const nombres = listas.filter((x) => !x.soyYo).map((x) => x.nombre);
+  let i = 0, vel = 60;
+  const r = $('ruleta'); r.classList.add('girando');
+  let resp = null, fin = false;
+  post('/api/sacar', cred).then((j) => { resp = j; }).catch((err) => { fin = true; r.textContent = err.message; b.disabled = false; });
+  const t0 = Date.now();
+  const paso = () => {
+    if (fin) return;
+    if (resp && Date.now() - t0 > 2400) {
+      r.classList.remove('girando'); r.classList.add('listo'); r.textContent = resp.regalasA;
+      setTimeout(() => { yo.porSacar = false; yo.regalasA = resp.regalasA; yo.deseosDe = resp.deseosDe; pintarResultado(); cargarListas(); $('resultado').scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 1300);
+      return;
+    }
+    r.textContent = nombres.length ? nombres[i++ % nombres.length] : '🎁';
+    vel = Math.min(vel * 1.08, 260);
+    setTimeout(paso, vel);
+  };
+  paso();
+});
+
+function pintarGenero() {
+  $('t-genero').textContent = 'Soy:';
+  document.querySelectorAll('.mi-genero .gen').forEach((b) => b.classList.toggle('elegido', b.dataset.g === yo.genero));
+  $('genero-auto').classList.toggle('oculto', !yo.generoAuto);
+}
+document.querySelectorAll('.mi-genero .gen').forEach((b) => b.addEventListener('click', async () => {
+  try {
+    const j = await post('/api/mi-genero', { ...cred, genero: b.dataset.g });
+    yo.genero = j.genero; yo.generoAuto = false; cuadros.genero(j.genero); pintarGenero(); cargarListas();
+  } catch (err) { $('msg-lista').textContent = err.message; $('msg-lista').className = 'msg error'; }
+}));
+
+function pintarMiLista() {
+  const n = (yo.misDeseos || []).length;
+  $('nudge').textContent = n < 3 ? `Agrega al menos 3 regalos (llevas ${n}). ¡Muéstrales lo que te gusta!` : '¡Tu lista está lista! Puedes cambiarla cuando quieras.';
+  if (yo.pedidos > 0) {
+    $('pedidos').textContent = yo.pedidos === 1 ? '🎅 Alguien te pidió tu lista de deseos.' : `🎅 ${yo.pedidos} personas te pidieron tu lista de deseos.`;
+    $('pedidos').classList.remove('oculto');
+  } else $('pedidos').classList.add('oculto');
+}
+
+// ---------- Listas de deseos de todos ----------
+const CAT = ['🎧', '☕', '🌸', '👜'];
+async function cargarListas() {
+  try {
+    const j = await post('/api/listas', cred);
+    listas = j.listas;
+    $('listas-t').textContent = `Listas de deseos (${listas.length})`;
+    $('listas-ley').textContent = j.sorteoRealizado ? 'Nombre en gris = ya sacó su nombre. Negro = todavía no.' : 'Toca un nombre para ver su lista.';
+    const ul = $('listas'); ul.textContent = '';
+    for (const x of listas) {
+      const li = document.createElement('li');
+      const b = document.createElement('button'); b.type = 'button';
+      b.className = 'fila-lista' + (j.sorteoRealizado && x.conoce ? ' gris' : '');
+      const nom = document.createElement('div'); nom.className = 'nom';
+      const nb = document.createElement('b'); nb.textContent = x.nombre;
+      const sm = document.createElement('small'); sm.textContent = x.soyYo ? 'Tú' : (x.deseos.length ? `${x.deseos.length} en su lista` : 'Sin lista todavía');
+      nom.append(nb, sm);
+      const mini = document.createElement('div'); mini.className = 'mini';
+      for (let i = 0; i < 3; i++) {
+        const d = x.deseos[i];
+        const s = document.createElement('span');
+        if (d) { s.className = 'lleno'; s.textContent = CAT[d.slot] || '🎁'; }
+        mini.appendChild(s);
+      }
+      const ch = document.createElement('span'); ch.className = 'chev'; ch.textContent = '›';
+      b.append(nom, mini, ch);
+      b.onclick = () => (x.soyYo ? $('mi-lista').scrollIntoView({ behavior: 'smooth' }) : abrirLista(x));
+      li.appendChild(b); ul.appendChild(li);
+    }
+  } catch (err) { if (err.sesion === false) { guardarToken(null); location.reload(); } }
+}
+
+function botonLinea(texto, clase) {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'btn-linea ' + clase;
+  const t = document.createElement('span'); t.textContent = texto;
+  const f = document.createElement('span'); f.textContent = '›';
+  b.append(t, f);
+  return { b, t };
+}
+function abrirLista(x) {
+  const H = hojaInferior(`Lista de deseos de ${x.nombre}`);
+  if (x.deseos.length) {
+    const cont = document.createElement('div');
+    mostrarDeseos(cont, x.deseos, opc());
+    H.cuerpo.appendChild(cont);
+  } else {
+    const v = document.createElement('div'); v.className = 'vacia-lista';
+    v.textContent = `${x.nombre} todavía no ha hecho su lista.`;
+    H.cuerpo.appendChild(v);
+  }
+  const pedir = botonLinea(x.yaPedi ? '✓ Ya le pediste su lista' : 'Pedir su lista sin decir quién eres', 'lleno');
+  pedir.b.disabled = x.yaPedi;
+  pedir.b.onclick = async () => {
+    try { await post('/api/pedir-lista', { ...cred, id: x.id }); x.yaPedi = true; pedir.t.textContent = '✓ Listo: le avisaremos sin decir quién fue'; pedir.b.disabled = true; }
+    catch (err) { pedir.t.textContent = err.message; }
+  };
+  const busca = botonLinea(`Buscador de regalos para ${x.nombre}`, 'borde');
+  busca.b.onclick = () => { H.cerrar(); buscadorRegalos({ nombre: x.nombre, genero: x.genero, pais: yo.pais, rango: yo.rango }); };
+  H.cuerpo.append(pedir.b, busca.b);
+}
+
+$('b-lista-rec').addEventListener('click', () => {
+  const x = listas.find((l) => l.nombre === yo.regalasA);
+  if (x) abrirLista(x);
+});
+$('b-busca-rec').addEventListener('click', () => {
+  const x = listas.find((l) => l.nombre === yo.regalasA);
+  buscadorRegalos({ nombre: yo.regalasA, genero: x && x.genero, pais: yo.pais, rango: yo.rango });
+});
+
+// ---------- Mi lista ----------
+// Regalo compartido desde Ripley (Android: Compartir → Aventura de Colores)
+let compartido = (() => {
+  const q = new URLSearchParams(location.search);
+  const texto = [q.get('text'), q.get('url')].filter(Boolean).join(' ');
+  return /https?:\/\//.test(texto) ? { texto, titulo: q.get('title') || '' } : null;
+})();
+$('b-guardar').addEventListener('click', () => guardarLista());
+async function guardarLista() {
+  const m = $('msg-lista'); m.className = 'msg oculto';
+  const deseos = cuadros.leer();
+  if (!deseos.length) { m.textContent = 'Deja al menos un regalo en tu lista.'; m.className = 'msg error'; return; }
+  $('b-guardar').disabled = true;
+  try {
+    const j = await post('/api/mis-deseos', { ...cred, deseos });
+    yo.misDeseos = j.misDeseos; yo.pedidos = 0; pintarMiLista(); cargarListas();
+    m.textContent = '¡Lista guardada!'; m.className = 'msg ok';
+  } catch (err) { m.textContent = err.message; m.className = 'msg error'; }
+  $('b-guardar').disabled = false;
+}
+
+// ---------- Chat ----------
+function pintarChat() {
+  if (!chat) return;
+  const lista = hilo === 'elegido' ? chat.conElegido : chat.conAmigo;
+  $('chat-ayuda').textContent = hilo === 'elegido'
+    ? `Pregúntale a ${chat.elegido} lo que quieras (talla, color, gustos). No sabrá que eres tú: verá “Tu amigo secreto”.`
+    : 'Aquí te escribe la persona que te va a regalar. Tú no sabes quién es, y tus respuestas le llegan solo a esa persona.';
+  const caja = $('burbujas'); caja.textContent = '';
+  if (!lista.length) {
+    const v = document.createElement('p'); v.className = 'ayuda centro'; v.textContent = hilo === 'elegido' ? 'Todavía no hay mensajes. ¡Escríbele!' : 'Tu amigo secreto todavía no te ha escrito.'; caja.appendChild(v);
+  }
+  for (const m of lista) {
+    const b = document.createElement('div'); b.className = 'burbuja ' + (m.mio ? 'mia' : 'suya');
+    const q = document.createElement('div'); q.className = 'quien-msg';
+    q.textContent = m.mio ? 'Tú' : (hilo === 'elegido' ? chat.elegido : '🎅 Tu amigo secreto');
+    const t = document.createElement('div'); t.textContent = m.texto;
+    const h = document.createElement('div'); h.className = 'hora';
+    h.textContent = new Date(m.fecha).toLocaleString('es-PE', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+    b.append(q, t, h); caja.appendChild(b);
+  }
+  caja.scrollTop = caja.scrollHeight;
+  const badge = (id, n) => { $(id).textContent = n; $(id).classList.toggle('oculto', !n); };
+  badge('n-elegido', hilo === 'elegido' ? 0 : chat.nuevosElegido);
+  badge('n-amigo', hilo === 'amigo' ? 0 : chat.nuevosAmigo);
+  $('t-elegido').classList.toggle('activa', hilo === 'elegido');
+  $('t-amigo').classList.toggle('activa', hilo === 'amigo');
+}
+async function cargarChat() {
+  if (!cred) return;
+  try { chat = await post('/api/chat', { ...cred, leido: hilo }); if (chat.disponible) pintarChat(); }
+  catch (err) { if (err.sesion === false) { guardarToken(null); location.reload(); } }
+}
+$('t-elegido').addEventListener('click', () => { hilo = 'elegido'; pintarChat(); cargarChat(); });
+$('t-amigo').addEventListener('click', () => { hilo = 'amigo'; pintarChat(); cargarChat(); });
+$('f-chat').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const texto = $('chat-txt').value.trim();
+  if (!texto) return;
+  $('b-chat').disabled = true; $('msg-chat').className = 'msg oculto';
+  try { chat = await post('/api/chat/enviar', { ...cred, hilo, texto }); $('chat-txt').value = ''; pintarChat(); }
+  catch (err) { $('msg-chat').textContent = err.message; $('msg-chat').className = 'msg error'; }
+  $('b-chat').disabled = false;
+});
+
+$('b-salir').addEventListener('click', async () => {
+  if (cred?.token) await post('/api/salir', { token: cred.token }).catch(() => {});
+  guardarToken(null); location.reload();
+});
+</script>
+<script src="/instalar.js"></script>
+</body>
+</html>
